@@ -1,0 +1,887 @@
+{
+  "name": "🛡️Cyber-Watch⚠️(de)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -1568,
+        384
+      ],
+      "id": "e95b1b18-6c72-4878-9c8e-824233497348",
+      "name": "Schedule - Every 1 Hour"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"quellen\": [\n    {\"name\": \"Bleeping Computer\", \"url\": \"https://www.bleepingcomputer.com/feed/\"},\n    {\"name\": \"Borns IT-Blog\", \"url\": \"https://borncity.com/blog/feed/\"},\n    {\"name\": \"Dark Reading\", \"url\": \"https://www.darkreading.com/rss.xml\"},\n    {\"name\": \"Heise Security\", \"url\": \"https://www.heise.de/security/rss/alert-news-atom.xml\"},\n    {\"name\": \"Krebs on Security\", \"url\": \"https://krebsonsecurity.com/feed/\"},\n    {\"name\": \"Schneier on Security\", \"url\": \"https://www.schneier.com/feed/atom/\"}\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1344,
+        384
+      ],
+      "id": "6532d895-4263-4471-8928-c3c24693b6f1",
+      "name": "Set - Feed Sources List"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "quellen",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -1120,
+        384
+      ],
+      "id": "9ffcb33b-8b36-4f64-9b46-46068380957f",
+      "name": "Split - Separate Feed URLs"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        -896,
+        384
+      ],
+      "id": "027ef831-1889-48df-8f16-655ed750a26c",
+      "name": "RSS - Fetch Articles (Continue)",
+      "alwaysOutputData": false,
+      "onError": "continueRegularOutput",
+      "notes": "This node is set to Continue On Error so the workflow doesn't fail if Krebs on Security goes down — as seen during the \"Mirai\" attack in Sep 2016 and the 2026 attack that previously caused errors here."
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_SPREADSHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2095440365,
+          "mode": "list",
+          "cachedResultName": "Cyber-Watch",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_SPREADSHEET_ID/edit#gid=2095440365"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -672,
+        464
+      ],
+      "id": "41633a92-d6df-458d-b9bd-960f6f120cb4",
+      "name": "GSheets - Lookup Existing URLs",
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "vZvHxx1eqm2V9Y5E",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "link",
+              "field2": "Url"
+            }
+          ]
+        },
+        "joinMode": "keepNonMatches",
+        "outputDataFrom": "input1",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -448,
+        384
+      ],
+      "id": "71e24d61-4551-4b79-b168-043e63a6da89",
+      "name": "Filter - Exclude Sent URLs"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "b31039d2-72c4-4be1-b3b6-b265094c2c8e",
+                    "leftValue": "={{ $json.link }}",
+                    "rightValue": "borncity.com",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "6c208a74-b19a-4c35-aa69-dbf5887e3285",
+                    "leftValue": "={{ $json.link }}",
+                    "rightValue": "heise.de",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "67fdb9da-0a51-42a1-b1af-d59229dff6ce",
+                    "leftValue": "={{ $json.link }}",
+                    "rightValue": "schneier.com",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "68dc98e6-eb65-4d0e-b07e-45edcf51407a",
+                    "leftValue": "={{ $json.link }}",
+                    "rightValue": "krebsonsecurity.com",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "bfa888a5-48cd-4467-92f0-26a18714829f",
+                    "leftValue": "={{ $json.link }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -224,
+        336
+      ],
+      "id": "fb48f5a7-76c1-4e54-add8-e6e9f6256eeb",
+      "name": "Switch - Route by Domain"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d12f738e-2af3-4886-a3c6-2c115123a5d5",
+              "name": "creator",
+              "value": "Günter Born",
+              "type": "string"
+            },
+            {
+              "id": "8eba0f06-a3bc-4d0c-a4c4-225cd90e0b0e",
+              "name": "final_title",
+              "value": "={{ $json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "4c40813f-3173-4128-8677-d635fe93718d",
+              "name": "pubDate",
+              "value": "={{ $json.pubDate }}",
+              "type": "string"
+            },
+            {
+              "id": "707ed00f-3350-489c-ab39-b05f721b0c2f",
+              "name": "final_url",
+              "value": "={{ $json.link }}",
+              "type": "string"
+            },
+            {
+              "id": "6539a0cb-71fd-4d61-aae4-ae5ecf28e244",
+              "name": "sortDate",
+              "value": "={{ DateTime.fromRFC2822($json.pubDate).toMillis() }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "1ffdee69-2272-4109-ab56-833db6e159de",
+      "name": "Format - BornCity Metadata"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "620684b1-81cc-475c-b22b-3a6b1520d25f",
+              "name": "creator",
+              "value": "Heise Security",
+              "type": "string"
+            },
+            {
+              "id": "3ffc1886-7fb9-4fbd-8ee2-91de7cd5ac7f",
+              "name": "final_title",
+              "value": "={{ $json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "3914438b-a696-43c8-8287-a67c23104d27",
+              "name": "pubDate",
+              "value": "={{ $json.pubDate }}",
+              "type": "string"
+            },
+            {
+              "id": "9114ac70-5e25-49be-94d9-30b7306563ce",
+              "name": "final_url",
+              "value": "={{ $json.link }}",
+              "type": "string"
+            },
+            {
+              "id": "efd61136-58f9-42d3-bd23-2c7f7dbc39a7",
+              "name": "sortDate",
+              "value": "={{ DateTime.fromISO($json.pubDate).toMillis() }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        192
+      ],
+      "id": "7d1d6e32-2ac0-4aaa-84dd-7c032be0f5ab",
+      "name": "Format - Heise Security Metadata"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "495ed261-2257-4332-a51a-d555a54f4a23",
+              "name": "creator",
+              "value": "={{ $json.author }} | *Schneier on Security*",
+              "type": "string"
+            },
+            {
+              "id": "222e6c83-11e9-4a62-b075-abdbcca99cff",
+              "name": "final_title",
+              "value": "={{ $json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "196696ec-612c-44d7-b740-b411225812c7",
+              "name": "pubDate",
+              "value": "={{ $json.pubDate }}",
+              "type": "string"
+            },
+            {
+              "id": "361924c5-9a58-4cf2-b6ab-603db57f9914",
+              "name": "final_url",
+              "value": "={{ $json.link }}",
+              "type": "string"
+            },
+            {
+              "id": "0a13d94c-7bee-49bd-9366-30695d45d320",
+              "name": "sortDate",
+              "value": "={{ DateTime.fromISO($json.pubDate).toMillis() }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {
+          "ignoreConversionErrors": true
+        }
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        384
+      ],
+      "id": "b5b68f68-fb01-429a-a402-25041804c5db",
+      "name": "Format - Schneier Metadata"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ef98a7d3-b6fc-46f0-ade5-cf636b55eca2",
+              "name": "creator",
+              "value": "Brian Krebs",
+              "type": "string"
+            },
+            {
+              "id": "6f07daba-ca38-4701-b846-4c1cc3e3962c",
+              "name": "final_title",
+              "value": "={{ $json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "79b396a1-4dc2-45a9-aa8d-8838f971479e",
+              "name": "pubDate",
+              "value": "={{ $json.pubDate }}",
+              "type": "string"
+            },
+            {
+              "id": "455542b4-cdaa-470f-bddb-9007a2af1596",
+              "name": "final_url",
+              "value": "={{ $json.link }}",
+              "type": "string"
+            },
+            {
+              "id": "ea64f389-cf06-4a20-914c-53e5e85bda96",
+              "name": "sortDate",
+              "value": "={{ DateTime.fromRFC2822($json.pubDate).toMillis() }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        576
+      ],
+      "id": "a151eafd-acb2-4cf0-8451-dba083df55e3",
+      "name": "Format - Krebs Metadata"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "058f3a0a-9f9c-418a-bc00-08e775aee8f1",
+              "name": "creator",
+              "value": "={{ $json.creator }} | *{{ $('Split - Separate Feed URLs').item.json.name }}*",
+              "type": "string"
+            },
+            {
+              "id": "41cc2e53-d7f5-4a8b-b6e4-95300d2cffa6",
+              "name": "final_title",
+              "value": "={{ $json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "28d5e4a1-7e6c-44d1-a46f-5e54b23c4793",
+              "name": "pubDate",
+              "value": "={{ $json.pubDate }}",
+              "type": "string"
+            },
+            {
+              "id": "e593a7bf-c185-4bdc-9dae-700268c18ce8",
+              "name": "final_url",
+              "value": "={{ $json.link }}",
+              "type": "string"
+            },
+            {
+              "id": "10b57086-5a2f-4256-a2a9-87c554536b90",
+              "name": "sortDate",
+              "value": "={{ DateTime.fromRFC2822($json.pubDate).toMillis() }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        768
+      ],
+      "id": "36ec229d-07e6-4fa7-822b-a0566afb4642",
+      "name": "Format - BleepingComputer & Dark Reading Metadata"
+    },
+    {
+      "parameters": {
+        "numberInputs": 5
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        224,
+        336
+      ],
+      "id": "60720606-e289-47d4-aae4-7c0c470ed935",
+      "name": "Merge - Recombine Feeds"
+    },
+    {
+      "parameters": {
+        "sortFieldsUi": {
+          "sortField": [
+            {
+              "fieldName": "sortDate"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.sort",
+      "typeVersion": 1,
+      "position": [
+        448,
+        384
+      ],
+      "id": "119e1d59-40ed-4d1f-af8a-0d3b6bee49d0",
+      "name": "Sort - Oldest First"
+    },
+    {
+      "parameters": {
+        "batchSize": 10,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        672,
+        384
+      ],
+      "id": "b5d7c6ab-142e-4d41-a732-175a9cfa0143",
+      "name": "Loop - Split Batches (10 Items)"
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "=## 🛡️ Cyber-Watch Alert ⚠️\n### [{{ $json.final_title }}]({{ $json.final_url }})\n**✍️ Autor:** {{ $json.creator.trim().replace(/\\n/g, ' ').replace(/\\s+/g, ' ') }}\n**📅 Veröffentlicht:** {{ $json.pubDate ? $json.pubDate.toDate().format('dd.MM.yyyy, HH:mm', 'Europe/Berlin') : 'Kein Datum verfügbar' }} (<t:{{ Math.floor(new Date($json.pubDate).getTime() / 1000) }}:R>) ⏱️\n-# *This message was sent automatically with n8n*",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        896,
+        320
+      ],
+      "id": "e179f98f-3e3b-433a-a1c2-5ee9659ff225",
+      "name": "Discord - Send Alert",
+      "webhookId": "c34edf11-8508-4e54-b4c9-e7d42824b8aa",
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "afJNs3wfla53N5YK",
+          "name": "Discord: 🛡️Cyber-Watch⚠️"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_SPREADSHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2095440365,
+          "mode": "list",
+          "cachedResultName": "Cyber-Watch",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_SPREADSHEET_ID/edit#gid=2095440365"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Url": "={{ $('Merge - Recombine Feeds').item.json.final_url }}",
+            "Titel": "={{ $('Merge - Recombine Feeds').item.json.final_title }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Url",
+              "displayName": "Url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Titel",
+              "displayName": "Titel",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1120,
+        320
+      ],
+      "id": "ce9de348-a97c-4602-a18b-303f1bde791a",
+      "name": "GSheets - Append Sent URLs",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "vZvHxx1eqm2V9Y5E",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 1
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1344,
+        384
+      ],
+      "id": "09d73c94-01e3-4b32-b3ef-b1cb7f1b9f80",
+      "name": "Wait - Rate Limit Buffer (1s)",
+      "webhookId": "b7bf6119-1a57-4a26-ad58-95d5e275f1d9"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule - Every 1 Hour": {
+      "main": [
+        [
+          {
+            "node": "Set - Feed Sources List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set - Feed Sources List": {
+      "main": [
+        [
+          {
+            "node": "Split - Separate Feed URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split - Separate Feed URLs": {
+      "main": [
+        [
+          {
+            "node": "RSS - Fetch Articles (Continue)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS - Fetch Articles (Continue)": {
+      "main": [
+        [
+          {
+            "node": "GSheets - Lookup Existing URLs",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Filter - Exclude Sent URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GSheets - Lookup Existing URLs": {
+      "main": [
+        [
+          {
+            "node": "Filter - Exclude Sent URLs",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Filter - Exclude Sent URLs": {
+      "main": [
+        [
+          {
+            "node": "Switch - Route by Domain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch - Route by Domain": {
+      "main": [
+        [
+          {
+            "node": "Format - BornCity Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Format - Heise Security Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Format - Schneier Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Format - Krebs Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Format - BleepingComputer & Dark Reading Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format - BornCity Metadata": {
+      "main": [
+        [
+          {
+            "node": "Merge - Recombine Feeds",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format - Heise Security Metadata": {
+      "main": [
+        [
+          {
+            "node": "Merge - Recombine Feeds",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Format - Schneier Metadata": {
+      "main": [
+        [
+          {
+            "node": "Merge - Recombine Feeds",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Format - Krebs Metadata": {
+      "main": [
+        [
+          {
+            "node": "Merge - Recombine Feeds",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Format - BleepingComputer & Dark Reading Metadata": {
+      "main": [
+        [
+          {
+            "node": "Merge - Recombine Feeds",
+            "type": "main",
+            "index": 4
+          }
+        ]
+      ]
+    },
+    "Merge - Recombine Feeds": {
+      "main": [
+        [
+          {
+            "node": "Sort - Oldest First",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sort - Oldest First": {
+      "main": [
+        [
+          {
+            "node": "Loop - Split Batches (10 Items)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop - Split Batches (10 Items)": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Discord - Send Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Discord - Send Alert": {
+      "main": [
+        [
+          {
+            "node": "GSheets - Append Sent URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GSheets - Append Sent URLs": {
+      "main": [
+        [
+          {
+            "node": "Wait - Rate Limit Buffer (1s)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait - Rate Limit Buffer (1s)": {
+      "main": [
+        [
+          {
+            "node": "Loop - Split Batches (10 Items)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "d7938472-fe66-4390-ad04-0349653d0b84",
+  "meta": {
+    "instanceId": "18da6dd9697b1fb7fa9684e5578840545014998b708b2c7ada1ec4873bb2dda8"
+  },
+  "nodeGroups": [],
+  "id": "iAZk6XEUb0vSBb6y",
+  "tags": []
+}
