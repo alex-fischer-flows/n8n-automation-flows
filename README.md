@@ -67,5 +67,3 @@ This is what an alert looks like in Discord:
 ## 📝 License & Notes
 
 Free to use and adapt. The Discord node can be swapped out for Slack, Telegram, or Microsoft Teams if you prefer a different notification channel.
-
-← [Back to the main overview of all workflows](../../README.md)
