@@ -7,8 +7,8 @@ Two versions are available in this repo:
 
 | Version | Sources | Discord message language |
 |---|---|---|
-| 🇩🇪 `Cyber-Watch (de).json` | BleepingComputer, BornCity, Dark Reading, Heise Security, Krebs on Security, Schneier on Security | German (`Autor`, `Veröffentlicht`) |
-| 🇬🇧 `Cyber-Watch (en).json` | BleepingComputer, Dark Reading, Krebs on Security, Schneier on Security | English (`Author`, `Published`) |
+| 🇩🇪 `cyber-watch-de.json` | BleepingComputer, BornCity, Dark Reading, Heise Security, Krebs on Security, Schneier on Security | German (`Autor`, `Veröffentlicht`) |
+| 🇬🇧 `cyber-watch-en.json` | BleepingComputer, Dark Reading, Krebs on Security, Schneier on Security | English (`Author`, `Published`) |
 
 The English version excludes the two German-language-only sources (Heise Security and BornCity/Günther Born) since their content wouldn't be relevant for an English-speaking audience.
 
@@ -51,7 +51,7 @@ This is what an alert looks like in Discord:
 
 ### 2. Import & configure the workflow in n8n
 
-1. Download the workflow file for your preferred language (`Cyber-Watch (de).json` or `Cyber-Watch (en).json`) and import it into n8n (`Workflows` → `Import from File`).
+1. Download the workflow file for your preferred language (`cyber-watch-de.json` or `cyber-watch-en.json`) and import it into n8n (`Workflows` → `Import from File`).
 2. **Connect your Google Sheets credentials:**
    - Open the node `GSheets - Lookup Existing URLs`.
    - Under **Credential**, select your Google Sheets OAuth2 connection.
